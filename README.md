@@ -279,8 +279,7 @@ ORDER BY hour DESC;
 
 | Decorator | Behavior | Use Case |
 |-----------|----------|----------|
-| `@dlt.expect("name", "condition")` | Track only | Monitoring, metrics |
-| `@dlt.expect_or_warn("name", "condition")` | Track + warn | Soft constraints |
+| `@dlt.expect("name", "condition")` | Track only | Monitoring, metrics, soft constraints |
 | `@dlt.expect_or_drop("name", "condition")` | Drop bad rows | Data cleansing |
 | `@dlt.expect_or_fail("name", "condition")` | Fail pipeline | Critical constraints |
 
@@ -345,11 +344,11 @@ python sample_data/generate_cdc_files.py \
 
 **What happens**: 
 - `expect_or_fail` causes pipeline failure (invalid year/month)
-- `expect_or_warn` logs warning but continues
+- `expect` logs violations in metrics but continues
 - `expect_or_drop` silently drops bad rows
 
 **Remediation**:
-1. Change `expect_or_fail` to `expect_or_warn` for graceful handling
+1. Change `expect_or_fail` to `expect` for graceful handling (track only)
 2. Adjust the condition bounds
 3. Re-run only affected datasets
 

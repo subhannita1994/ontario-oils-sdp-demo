@@ -269,7 +269,7 @@ class CDCGenerator:
         }
         self._write_json_file("dim_date", [invalid_date], "_expect_fail")
         
-        # Violate expect_or_warn (null FK in fact table)
+        # Violate expect (null FK in fact table - will be tracked in metrics)
         print("fact_well_construction (EXPECT_OR_WARN violation - null FK):")
         null_fk_well = {
             "well_construction_id": 100,

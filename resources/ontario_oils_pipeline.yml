@@ -19,14 +19,14 @@ resources:
         "schema": ${var.schema}
         "landing_volume": ${var.landing_volume}
       
-      # Source code libraries
+      # Source code libraries (paths relative to resources folder)
       libraries:
         - notebook:
             path: ../src/ontario_oils/bronze/ingest.py
         - notebook:
             path: ../src/ontario_oils/silver/transform.py
       
-      # Serverless compute (recommended for SDP)
+      # Serverless compute
       serverless: true
       
       # Continuous mode for streaming (set to false for triggered/batch)
@@ -35,8 +35,8 @@ resources:
       # Development mode settings
       development: true
       
-      # Channel for runtime version
-      channel: PREVIEW
+      # Channel for runtime version (use CURRENT for stability)
+      channel: CURRENT
       
       # Photon acceleration
       photon: true

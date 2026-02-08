@@ -12,6 +12,9 @@ variables:
   catalog:
     description: Unity Catalog name
     default: erp-demonstrations
+  schema:
+    description: Target schema for tables (environment-specific)
+    default: arc_dev
   landing_volume:
     description: Volume name for CDC file landing zone
     default: landing_zone
@@ -32,21 +35,21 @@ targets:
     variables:
       schema: arc_dev
     workspace:
-      root_path: /Workspace/Users/subhannita.sarcar@databricks.com/ontario-oils-sdp-demo/arc_dev
+      root_path: /Workspace/Shared/ontario-oils-sdp-demo/arc_dev
 
   # Test environment
   arc_test:
     variables:
       schema: arc_test
     workspace:
-      root_path: /Workspace/Users/subhannita.sarcar@databricks.com/ontario-oils-sdp-demo/arc_test
+      root_path: /Workspace/Shared/ontario-oils-sdp-demo/arc_test
 
   # Production environment
   arc_prod:
     variables:
       schema: arc_prod
     workspace:
-      root_path: /Workspace/Users/subhannita.sarcar@databricks.com/ontario-oils-sdp-demo/arc_prod
+      root_path: /Workspace/Shared/ontario-oils-sdp-demo/arc_prod
     # Production-specific settings
     run_as:
       # Uncomment and set service principal for production
