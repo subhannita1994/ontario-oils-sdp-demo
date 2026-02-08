@@ -110,38 +110,42 @@ dlt.apply_changes(
 
 # MAGIC %md
 # MAGIC ## Validated Tables with Expectations
+# MAGIC 
+# MAGIC Using Materialized Views (not streaming tables) because SCD Type 2 tables 
+# MAGIC perform MERGE operations which are not append-only.
 
 # COMMAND ----------
 
-@dlt.table(
+@dlt.view(
     name="dim_location_validated",
-    comment="Location dimension with expectations"
+    comment="Location dimension with expectations (Materialized View)"
 )
 @dlt.expect("location_id_not_null", "location_id IS NOT NULL")
 @dlt.expect("valid_utm_easting", "utm_easting > 0 OR utm_easting IS NULL")
 def dim_location_validated():
-    return dlt.read_stream("dim_location_silver")
+    # Use dlt.read() for batch read from SCD Type 2 table
+    return dlt.read("dim_location_silver")
 
 # COMMAND ----------
 
-@dlt.table(
+@dlt.view(
     name="dim_date_validated",
-    comment="Date dimension with expectations"
+    comment="Date dimension with expectations (Materialized View)"
 )
 @dlt.expect("date_id_not_null", "date_id IS NOT NULL")
 @dlt.expect_or_fail("valid_year", "year BETWEEN 1800 AND 2100")
 @dlt.expect_or_fail("valid_month", "month BETWEEN 1 AND 12")
 def dim_date_validated():
-    return dlt.read_stream("dim_date_silver")
+    return dlt.read("dim_date_silver")
 
 # COMMAND ----------
 
-@dlt.table(
+@dlt.view(
     name="fact_well_construction_validated",
-    comment="Fact table with expectations"
+    comment="Fact table with expectations (Materialized View)"
 )
 @dlt.expect_or_fail("pk_not_null", "well_construction_id IS NOT NULL")
 @dlt.expect("fk_location_not_null", "location_id IS NOT NULL")
 @dlt.expect_or_drop("valid_well_identifier", "well_identifier IS NOT NULL")
 def fact_well_construction_validated():
-    return dlt.read_stream("fact_well_construction_silver")
+    return dlt.read("fact_well_construction_silver")
