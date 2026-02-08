@@ -1,0 +1,54 @@
+# Databricks Asset Bundle Configuration
+# Ontario Oils SDP Demo Pipeline
+# 
+# This bundle defines a Spark Declarative Pipeline (SDP) for streaming ingestion
+# from simulated PostgreSQL CDC files through Bronze and Silver layers.
+
+bundle:
+  name: ontario-oils-sdp-demo
+
+# Variables for environment-specific configuration
+variables:
+  catalog:
+    description: Unity Catalog name
+    default: erp-demonstrations
+  landing_volume:
+    description: Volume name for CDC file landing zone
+    default: landing_zone
+
+# Include pipeline resource definitions
+include:
+  - resources/*.yml
+
+# Workspace configuration
+workspace:
+  host: https://fevm-serverless-nv91sa.cloud.databricks.com
+
+# Environment targets - schema-level partitioning within the same catalog
+targets:
+  # Development environment
+  arc_dev:
+    default: true
+    variables:
+      schema: arc_dev
+    workspace:
+      root_path: /Workspace/Users/subhannita.sarcar@databricks.com/ontario-oils-sdp-demo/arc_dev
+
+  # Test environment
+  arc_test:
+    variables:
+      schema: arc_test
+    workspace:
+      root_path: /Workspace/Users/subhannita.sarcar@databricks.com/ontario-oils-sdp-demo/arc_test
+
+  # Production environment
+  arc_prod:
+    variables:
+      schema: arc_prod
+    workspace:
+      root_path: /Workspace/Users/subhannita.sarcar@databricks.com/ontario-oils-sdp-demo/arc_prod
+    # Production-specific settings
+    run_as:
+      # Uncomment and set service principal for production
+      # service_principal_name: ontario-oils-prod-sp
+      user_name: subhannita.sarcar@databricks.com

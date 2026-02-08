@@ -1,0 +1,57 @@
+# Ontario Oils SDP Pipeline Resource Definition
+# 
+# This file defines the Spark Declarative Pipeline (DLT) for the Ontario Oils dataset.
+# The pipeline streams CDC data from Unity Catalog Volumes through Bronze and Silver layers.
+
+resources:
+  pipelines:
+    ontario_oils_pipeline:
+      name: "Ontario Oils SDP Pipeline - ${var.schema}"
+      
+      # Target catalog and schema from bundle variables
+      catalog: ${var.catalog}
+      target: ${var.schema}
+      
+      # Pipeline configuration
+      configuration:
+        # Pass variables to pipeline code
+        "catalog": ${var.catalog}
+        "schema": ${var.schema}
+        "landing_volume": ${var.landing_volume}
+      
+      # Source code libraries
+      libraries:
+        - notebook:
+            path: ../src/ontario_oils/bronze/ingest.py
+        - notebook:
+            path: ../src/ontario_oils/silver/transform.py
+      
+      # Serverless compute (recommended for SDP)
+      serverless: true
+      
+      # Continuous mode for streaming (set to false for triggered/batch)
+      continuous: false
+      
+      # Development mode settings
+      development: true
+      
+      # Channel for runtime version
+      channel: PREVIEW
+      
+      # Photon acceleration
+      photon: true
+      
+      # Pipeline clusters (used when serverless: false)
+      # clusters:
+      #   - label: default
+      #     autoscale:
+      #       min_workers: 1
+      #       max_workers: 4
+      
+      # Notifications (optional)
+      # notifications:
+      #   - email_recipients:
+      #       - subhannita.sarcar@databricks.com
+      #     alerts:
+      #       - on-update-failure
+      #       - on-flow-failure
