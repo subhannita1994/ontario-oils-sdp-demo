@@ -50,10 +50,12 @@ dlt.apply_changes(
 
 # COMMAND ----------
 
-# dim_date - SCD Type 1
+# dim_date - SCD Type 1 with inline expectations
 dlt.create_streaming_table(
     name="dim_date_silver",
-    comment="Cleaned date dimension with SCD Type 1"
+    comment="Cleaned date dimension with SCD Type 1",
+    expect_all_or_fail={"valid_year": "year BETWEEN 1800 AND 2100", 
+                        "valid_month": "month BETWEEN 1 AND 12"}
 )
 
 dlt.apply_changes(
@@ -93,7 +95,10 @@ dlt.apply_changes(
 
 dlt.create_streaming_table(
     name="fact_well_construction_silver",
-    comment="Cleaned well construction fact with SCD Type 1"
+    comment="Cleaned well construction fact with SCD Type 1",
+    expect_all={"pk_not_null": "well_construction_id IS NOT NULL",
+                "fk_location_not_null": "location_id IS NOT NULL"},
+    expect_all_or_drop={"valid_well_identifier": "well_identifier IS NOT NULL"}
 )
 
 dlt.apply_changes(
