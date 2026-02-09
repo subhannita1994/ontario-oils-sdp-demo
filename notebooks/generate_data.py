@@ -1,9 +1,9 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Generate CDC Test Data
-# MAGIC 
+# MAGIC
 # MAGIC Run this notebook to generate sample CDC data directly to the Unity Catalog Volume.
-# MAGIC 
+# MAGIC
 # MAGIC **Usage:**
 # MAGIC - Run "Initial Load" first to populate base data
 # MAGIC - Then run other sections to test specific scenarios
@@ -122,7 +122,7 @@ def write_to_volume(table_name, records, suffix=""):
 
 # MAGIC %md
 # MAGIC ## 1. Initial Load (Run First!)
-# MAGIC 
+# MAGIC
 # MAGIC This generates the base data for all tables.
 
 # COMMAND ----------
@@ -156,13 +156,13 @@ def generate_initial_load():
     print("\n✅ Initial load complete! Run the pipeline to ingest.")
 
 # Uncomment and run:
-# generate_initial_load()
+generate_initial_load()
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC ## 2. Generate Updates (SCD Type 2 Demo)
-# MAGIC 
+# MAGIC
 # MAGIC This updates existing records to demonstrate SCD Type 2 history tracking.
 
 # COMMAND ----------
@@ -201,13 +201,13 @@ def generate_updates():
     print("\n✅ Updates generated! Run the pipeline to see SCD Type 2 history.")
 
 # Uncomment and run:
-# generate_updates()
+generate_updates()
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC ## 3. Generate Out-of-Order Events (AUTO CDC Demo)
-# MAGIC 
+# MAGIC
 # MAGIC This generates events with timestamps that arrive out of order to demonstrate how `sequence_by` handles them.
 
 # COMMAND ----------
@@ -236,13 +236,13 @@ def generate_out_of_order():
     print("because apply_changes() uses sequence_by='_ts' to determine order.")
 
 # Uncomment and run:
-# generate_out_of_order()
+generate_out_of_order()
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC ## 4. Generate Expectation Violations (Data Quality Demo)
-# MAGIC 
+# MAGIC
 # MAGIC This generates records that violate expectations to demo different behaviors.
 
 # COMMAND ----------
@@ -297,18 +297,18 @@ def generate_expectation_violations():
     print(f"   dbutils.fs.rm('{VOLUME_PATH}/dim_date/batch_expect_fail_*.json')")
 
 # Uncomment and run:
-# generate_expectation_violations()
+generate_expectation_violations()
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC ## 5. Generate Schema Mismatch (Schema Evolution Demo)
-# MAGIC 
+# MAGIC
 # MAGIC This generates records with schema variations to demonstrate:
 # MAGIC - Missing columns (column dropped from source)
 # MAGIC - New columns (column added to source)
 # MAGIC - Type mismatches (string instead of int)
-# MAGIC 
+# MAGIC
 # MAGIC Auto Loader handles these based on `schemaEvolutionMode` setting.
 
 # COMMAND ----------
@@ -400,13 +400,13 @@ def generate_schema_mismatch():
     print("="*60)
 
 # Uncomment and run:
-# generate_schema_mismatch()
+generate_schema_mismatch()
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC ## 6. Clean Up Bad Data
-# MAGIC 
+# MAGIC
 # MAGIC Remove test files if you want the pipeline to succeed cleanly.
 
 # COMMAND ----------
@@ -434,7 +434,7 @@ def cleanup_bad_data():
     print("\n✅ Cleanup complete!")
 
 # Uncomment and run:
-# cleanup_bad_data()
+cleanup_bad_data()
 
 # COMMAND ----------
 
@@ -454,13 +454,13 @@ def cleanup_schema_files_only():
     print("\n✅ Schema test files cleaned!")
 
 # Uncomment and run:
-# cleanup_schema_files_only()
+cleanup_schema_files_only()
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC ## Quick Commands
-# MAGIC 
+# MAGIC
 # MAGIC Uncomment and run the function you need:
 
 # COMMAND ----------

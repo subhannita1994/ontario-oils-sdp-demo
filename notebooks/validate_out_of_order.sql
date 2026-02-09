@@ -22,13 +22,6 @@ FROM `erp-demonstrations`.arc_dev.dim_location_silver
 WHERE location_id = 1
 ORDER BY __START_AT;
 
--- Expected result (approximately):
--- | location_id | township_con_lot                  | utm_easting | __START_AT          | __END_AT            | status          |
--- |-------------|-----------------------------------|-------------|---------------------|---------------------|-----------------|
--- | 1           | Chatham-Kent Lot 5                | 456789      | 2024-01-01 00:00:00 | 2024-01-01 00:50:00 |                 |
--- | 1           | Chatham-Kent Lot 5 (Late Arrival) | 456789      | 2024-01-01 00:50:00 | 2024-01-01 01:40:00 |                 |
--- | 1           | Chatham-Kent Lot 5 (Updated)      | 456800      | 2024-01-01 01:40:00 | 2024-01-01 03:20:00 |                 |
--- | 1           | Chatham-Kent Lot 5 (Final)        | 456850      | 2024-01-01 03:20:00 | NULL                | ← CURRENT       |
 
 
 -- =============================================================================
@@ -40,8 +33,8 @@ ORDER BY __START_AT;
 SELECT 
     location_id,
     township_con_lot,
-    __START_AT AS effective_from,
-    __END_AT AS effective_to
+    __START_AT,
+    __END_AT
 FROM `erp-demonstrations`.arc_dev.dim_location_silver
 WHERE location_id = 1
 ORDER BY __START_AT;
