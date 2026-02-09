@@ -154,3 +154,36 @@ def dim_date_validated():
 @dlt.expect_or_drop("valid_well_identifier", "well_identifier IS NOT NULL")
 def fact_well_construction_validated():
     return dlt.read("fact_well_construction_silver")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## DEMO: Imperative Operation Example (Uncomment to Show Error)
+# MAGIC 
+# MAGIC Uncomment the function below to demonstrate how DLT catches disallowed 
+# MAGIC imperative operations. The pipeline will fail with a clear error.
+
+# COMMAND ----------
+
+# # DEMO: Uncomment this entire cell to show imperative operation error
+# # This demonstrates why "just writing code" doesn't work in DLT
+# 
+# @dlt.table(
+#     name="demo_imperative_error",
+#     comment="This table intentionally contains disallowed imperative code"
+# )
+# def demo_imperative_error():
+#     # Read the source data
+#     df = dlt.read("dim_location_silver")
+#     
+#     # DISALLOWED: Writing to external location (side effect)
+#     df.write.mode("overwrite").parquet("/tmp/audit_log")
+#     
+#     # DISALLOWED: Direct SQL mutation outside DLT
+#     spark.sql("INSERT INTO audit_log VALUES (current_timestamp(), 'processed')")
+#     
+#     # DISALLOWED: External API call (non-deterministic)
+#     # import requests
+#     # requests.post("https://webhook.example.com", json={"status": "done"})
+#     
+#     return df
