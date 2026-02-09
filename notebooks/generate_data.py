@@ -302,32 +302,159 @@ def generate_expectation_violations():
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## 5. Clean Up Bad Data
+# MAGIC ## 5. Generate Schema Mismatch (Schema Evolution Demo)
 # MAGIC 
-# MAGIC Remove the expectation violation files if you want the pipeline to succeed.
+# MAGIC This generates records with schema variations to demonstrate:
+# MAGIC - Missing columns (column dropped from source)
+# MAGIC - New columns (column added to source)
+# MAGIC - Type mismatches (string instead of int)
+# MAGIC 
+# MAGIC Auto Loader handles these based on `schemaEvolutionMode` setting.
+
+# COMMAND ----------
+
+def generate_schema_mismatch():
+    """Generate records with schema mismatches to demo schema evolution handling."""
+    print("=== Generating Schema Mismatch Records ===\n")
+    
+    # Scenario A: Missing column (utm_coordinates dropped)
+    print("📋 Scenario A: Missing column 'utm_coordinates'")
+    missing_column_record = {
+        "location_id": 20,
+        "township_con_lot": "Schema Test Township A",
+        # "utm_coordinates" is MISSING - simulates column dropped from source
+        "utm_zone": 17,
+        "utm_easting": 500000,
+        "utm_northing": 4800000,
+        "_op": "I",
+        "_ts": get_timestamp(600)
+    }
+    write_to_volume("dim_location", [missing_column_record], "_schema_missing_col")
+    print("   → Auto Loader will set utm_coordinates to NULL (with addNewColumns mode)")
+    
+    # Scenario B: New column added (extra_info not in original schema)
+    print("\n📋 Scenario B: New column 'extra_info' added to source")
+    new_column_record = {
+        "location_id": 21,
+        "township_con_lot": "Schema Test Township B",
+        "utm_coordinates": "17T 510000 4810000",
+        "utm_zone": 17,
+        "utm_easting": 510000,
+        "utm_northing": 4810000,
+        "extra_info": "This column was added later!",  # NEW column
+        "another_new_field": 12345,                    # Another NEW column
+        "_op": "I",
+        "_ts": get_timestamp(610)
+    }
+    write_to_volume("dim_location", [new_column_record], "_schema_new_col")
+    print("   → Auto Loader will add extra_info to schema (with addNewColumns mode)")
+    print("   → Or rescue to _rescued_data column (with rescue mode)")
+    
+    # Scenario C: Type mismatch (utm_easting as string instead of int)
+    print("\n📋 Scenario C: Type mismatch - utm_easting as STRING instead of INT")
+    type_mismatch_record = {
+        "location_id": 22,
+        "township_con_lot": "Schema Test Township C",
+        "utm_coordinates": "17T 520000 4820000",
+        "utm_zone": 17,
+        "utm_easting": "five-hundred-thousand",  # STRING instead of INT!
+        "utm_northing": 4820000,
+        "_op": "I",
+        "_ts": get_timestamp(620)
+    }
+    write_to_volume("dim_location", [type_mismatch_record], "_schema_type_mismatch")
+    print("   → This may cause a parsing error or be rescued to _rescued_data")
+    
+    # Scenario D: Completely different schema (wrong table data)
+    print("\n📋 Scenario D: Completely wrong schema (simulates wrong file in folder)")
+    wrong_schema_record = {
+        "wrong_field_1": "This is not a location record",
+        "wrong_field_2": 999,
+        "random_data": True,
+        "_op": "I",
+        "_ts": get_timestamp(630)
+    }
+    write_to_volume("dim_location", [wrong_schema_record], "_schema_wrong")
+    print("   → All expected columns will be NULL, data goes to _rescued_data")
+    
+    print("\n" + "="*60)
+    print("✅ Schema mismatch records generated!")
+    print("="*60)
+    print("\n📖 DEMO TALKING POINTS:")
+    print("─" * 40)
+    print("1. Auto Loader's schemaEvolutionMode handles these scenarios:")
+    print("   • 'addNewColumns' - Adds new columns, NULLs for missing")
+    print("   • 'rescue' - Puts mismatched data in _rescued_data column")
+    print("   • 'failOnNewColumns' - Fails if schema changes (strict)")
+    print("   • 'none' - No evolution, may lose data")
+    print("")
+    print("2. In traditional Spark, you'd need to:")
+    print("   • Manually check schema before processing")
+    print("   • Write try/catch blocks for type errors")
+    print("   • Manage schema registry separately")
+    print("")
+    print("3. With DLT + Auto Loader:")
+    print("   • Schema evolution is declarative (one option)")
+    print("   • Bad data is rescued, not lost")
+    print("   • Schema changes are tracked in _schema folder")
+    print("="*60)
+
+# Uncomment and run:
+# generate_schema_mismatch()
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 6. Clean Up Bad Data
+# MAGIC 
+# MAGIC Remove test files if you want the pipeline to succeed cleanly.
 
 # COMMAND ----------
 
 def cleanup_bad_data():
     """Remove files that cause pipeline failures."""
-    import re
-    
     print("=== Cleaning Up Bad Data ===\n")
     
-    # List and remove expect_fail files
-    try:
-        files = dbutils.fs.ls(f"{VOLUME_PATH}/dim_date/")
-        for f in files:
-            if "expect_fail" in f.name:
-                dbutils.fs.rm(f.path)
-                print(f"🗑️  Deleted: {f.name}")
-    except Exception as e:
-        print(f"No bad date files found: {e}")
+    cleanup_patterns = [
+        ("dim_date", "expect_fail"),
+        ("dim_location", "schema_"),
+        ("fact_well_construction", "expect_")
+    ]
+    
+    for table, pattern in cleanup_patterns:
+        try:
+            files = dbutils.fs.ls(f"{VOLUME_PATH}/{table}/")
+            for f in files:
+                if pattern in f.name:
+                    dbutils.fs.rm(f.path)
+                    print(f"🗑️  Deleted: {table}/{f.name}")
+        except Exception as e:
+            print(f"No files to clean in {table}: {e}")
     
     print("\n✅ Cleanup complete!")
 
 # Uncomment and run:
 # cleanup_bad_data()
+
+# COMMAND ----------
+
+def cleanup_schema_files_only():
+    """Remove only schema mismatch test files."""
+    print("=== Cleaning Up Schema Test Files ===\n")
+    
+    try:
+        files = dbutils.fs.ls(f"{VOLUME_PATH}/dim_location/")
+        for f in files:
+            if "schema_" in f.name:
+                dbutils.fs.rm(f.path)
+                print(f"🗑️  Deleted: {f.name}")
+    except Exception as e:
+        print(f"Error: {e}")
+    
+    print("\n✅ Schema test files cleaned!")
+
+# Uncomment and run:
+# cleanup_schema_files_only()
 
 # COMMAND ----------
 
@@ -352,5 +479,11 @@ generate_initial_load()
 # Step 4: Expectation violations (will fail pipeline!)
 # generate_expectation_violations()
 
-# Step 5: Clean up bad data
+# Step 5: Schema mismatch demo
+# generate_schema_mismatch()
+
+# Step 6: Clean up bad data
 # cleanup_bad_data()
+
+# Step 6b: Clean up only schema test files
+# cleanup_schema_files_only()
