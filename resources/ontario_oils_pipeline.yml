@@ -25,6 +25,8 @@ resources:
             path: ../src/ontario_oils/bronze/ingest.py
         - notebook:
             path: ../src/ontario_oils/silver/transform.py
+        - notebook:
+            path: ../src/ontario_oils/metrics/reconciliation.py
       
       # Serverless compute
       serverless: true
